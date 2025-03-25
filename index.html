@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+		<link href="css/common.css" rel="stylesheet" type="text/css" />
+		<script src="https://laozicloud-sdk.obs.cn-east-2.myhuaweicloud.com:443/h5/app.js" id="AMRT"></script>
+		<script src="https://laozicloud-sdk.obs.myhuaweicloud.com:443/libs/dat.gui.min.js"></script>
+		<script src="https://waibu-demo.obs.cn-east-2.myhuaweicloud.com:443/lib/message.min.js"></script>
+		<title></title>
+	</head>
+	<body>
+		<div id="container1">
+			<div id="loader-container">
+				<div class="loader"></div>
+				<p>Loading...</p>
+			</div>
+			<div id="main">
+				<div class="top-bar">
+					<div class="menu"></div>
+				</div>
+				<div class="fixed-div">
+					<div id="container" style="width: 328px;height: 450px;" />
+				</div>
+			</div>
+
+			<div class="side-bar">
+				<div class="s1" onclick="chai()"></div>
+				<div class="s2" onclick="stopchai()"></div>
+				<div class="s3" onclick="tuodong()"></div>
+				<div class="s4" onclick="stoptuo()"></div>
+			</div>
+			<div>
+				<!-- 这个div只是为了让side-bar在剩余的空间居中，用space-between -->
+			</div>
+		</div>
+		<div id="nav">
+			<div class="nav-item n1" onclick="fuyuan()">
+				<div></div>
+			</div>
+			<div class="nav-item n2" onclick="donghua()">
+				<div></div>
+			</div>
+			<div class="nav-item n3" onclick="donghuast()"">
+				<div></div>
+			</div>
+			<div class=" nav-item n4" onclick="info()">
+				<div></div>
+			</div>
+			<div class="nav-item n5">
+				<div></div>
+			</div>
+		</div>
+		</div>
+	</body>
+	<script>
+		//鉴权参数
+		// function load(seconds) {
+		// 	var div = document.getElementById('loader-container')
+		// 	setTimeout(function() {
+		// 		div.style.opacity = 0;
+		// 	}, seconds * 1000);
+		// }
+
+		// load(5);
+
+		const param = {
+			appkey: 'oDynSaXKLAtv',
+			appsecret: 'ZqjxMn41sF93yEgbieQDUlRK8ILcoYP6'
+		}
+		const viewer = new AMRT.Viewer('container', /*容器dom或者dom对应的id*/ param)
+
+		viewer.addEventListener(AMRT.Event.MODEL_UPDATE, () => {
+			console.log('update')
+		})
+
+		viewer.loadModel('1800498263045050368', {
+			background: false //之前的背景不启用，这一步是必要的，如果没有这一步不显示背景将不起作用
+		})
+		viewer.sceneManager.backgroundVisible = false //不显示背景
+
+		viewer.loadModel('1800498263045050368', {
+			onLoad: function hideDiv() {
+				document.getElementById("loader-container").style.display = "none";
+			},
+			onProgress: pct => console.log('当前加载进度', pct),
+			onError: error => console.log('模型加载失败', error),
+			onMatLoad: () => console.log('材质加载完成'),
+			onAnimeLoad: () => console.log('动画加载完成')
+		}) //加载模型的进度,只出现在控制台中，但是会出现undefined
+
+		viewer.container.onclick = function(e) {
+			var p = viewer.picker.screenToVector(e) //将屏幕坐标转换为三维坐标
+			if (p) {
+				viewer.hotSpotManager.addMarker({
+					position: p, //热点放置位置(必填)
+					onclick: () => Qmsg.success('标注') //点击后需要执行的回调(可选)
+				})
+				viewer.container.onclick = null
+			} else {
+				Qmsg.info("未选中模型")
+			}
+		}
+
+		function tuodong() {
+			viewer.operator.enabled = true //启用模型操作工具
+			viewer.operator.enableDrag = true //启用拖动功能
+		}
+
+		function stoptuo() {
+			viewer.operator.enabled = false //启用模型操作工具
+			viewer.operator.enableDrag = false //启用拖动功能
+		}
+
+		function fuyuan() {
+			viewer.operator.restore();
+		}
+
+		const model = viewer.loadModel('1800498263045050368')
+
+		//model.setExploding( 0.6 ) //拆分比例
+		function chai() {
+			new function() {
+				model.exploding.play({
+					time: 3000, //动画时长  默认3000
+					loop: 1, //循环次数
+					onComplete: () => {
+						console.log('onComplete');
+
+					}
+				})
+			}
+		}
+
+		function stopchai() {
+			(new function() {
+
+				model.exploding.stop()
+
+			})
+		}
+
+		function donghua() {
+			new function() {
+				model.animation.play()
+			}
+		}
+
+		function donghuast() {
+			new function() {
+				model.animation.stop()
+			}
+		}
+
+		function info() {
+			window.open("info.html")
+		}
+	</script>
+
+</html>
